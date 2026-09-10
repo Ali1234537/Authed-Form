@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import{Loader} from "lucide-react";
 
+import PublicRoute from "@/components/auth/PublicRoute";
 
 
 export default function RegisterPage() {
@@ -51,7 +52,9 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center">
+    <PublicRoute> 
+    <main className="flex min-h-screen items-center justify-center bg-cover bg-center"
+     style={{ backgroundImage: "url('/poster1.jpg')" }}>
       <form
         onSubmit={handleRegister}
         className="w-96 space-y-4 rounded border p-8"
@@ -118,6 +121,7 @@ export default function RegisterPage() {
           Already have an account? <strong> Login </strong>
         </button>
       </form>
-    </main>
+     </main>
+    </PublicRoute> 
   );
 }

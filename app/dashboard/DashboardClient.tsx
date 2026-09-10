@@ -1,4 +1,3 @@
- 
 "use client";
 
 import { useEffect, useState } from "react";
@@ -31,7 +30,8 @@ export default function DashboardClient() {
   const [email, setEmail] = useState("");
 
   const [message, setMessage] = useState("");
-  const [detail, setDetail] = useState("");
+  const [detail] = useState("");
+
   const [showMenu, setShowMenu] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
@@ -40,35 +40,21 @@ export default function DashboardClient() {
 
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const [isLoading , setIsLoading] = useState(true);
+  const[currentTime , setCurrentTime] = useState(new Date());
 
-  useEffect(() => {
-    async function getUser() {
-      try {
-        const response = await fetch(
-          "/api/auth/indiv"
-        );
 
-        if (!response.ok) {
-          router.push("/login");
-          return;
-        }
 
-        const data = await response.json();
-
-        dispatch(loginSuccess(data.user));
-
-        setName(data.user.name);
-        setEmail(data.user.email);
-        setIsLoading(false);
-
-      } catch (error) {
-        router.push("/login");
-      }
-    }
-
-    getUser();
-  }, [dispatch, router]);
+  /*This is start of the useEffect of Timer and date **/
+   useEffect(()=>{                                    //
+    const timer = setInterval(()=>{                   //
+      setCurrentTime(new Date());                     //
+    },1000);                                          //
+    return()=>{                                       //
+      clearInterval(timer);                           //
+    };                                                //
+   },[]);                                             //
+  /*This is end of the useEffect of Timer and date  ***/
+  
 
   useEffect(() => {
     if (user) {
@@ -102,18 +88,15 @@ export default function DashboardClient() {
       if (!response.ok) {
         setMessage(data.message);
         router.push("/login");
-        setIsLoading(false);
         return;
       }
 
       dispatch(loginSuccess(data.user));
 
-      const msg =
-        "Profile Updated successfully!";
+      setMessage(
+        "Profile Updated successfully!"
+      );
 
-      //const details = `After Updation  Name is "${name}"  and Email is "${email}" `;
-
-      setMessage(msg);
       setIsSuccess(true);
 
       setTimeout(() => {
@@ -121,13 +104,9 @@ export default function DashboardClient() {
         setMessage("");
       }, 3000);
 
-      //setMessage(details);
-
-      //alert(msg);
-
-    } catch (error) {
+    } catch {
       router.push("/login");
-      setIsLoading(false);
+
       setMessage(
         "Something went wrong. Please try again."
       );
@@ -149,34 +128,18 @@ export default function DashboardClient() {
 
       router.push("/login");
 
-    } catch (error) {
-      console.error(
-        "Logout failed:",
-        error
-      );
-
+    } catch {
       setIsLoggingOut(false);
     }
   }
 
-  if(isLoading){
-    return(
-      <div className = "flex min-h-screen items-center justify-center gap-4">
-        <Loader className="h-9 w-9 animate-spin"/>
-        <p className="text-xl font-semibold">
-        Loading ...
-        </p>
-      </div>
-    );
-  }
-
   return (
-
-    <main className="min-h-screen">
+    <main className="min-h-screen bg-cover bg-center"
+      style={{ backgroundImage: "url('/poster1.jpg')" }}>
 
       <nav className="flex items-center justify-between border-b px-8 py-4">
 
-        <h1 className="text-xl font-bold cursor-pointer">
+        <h1 className="text-xl font-sans font-bold text-center w-full">
           DASHBOARD
         </h1>
 
@@ -227,13 +190,24 @@ export default function DashboardClient() {
 
       </nav>
 
-      <div className="flex items-center justify-center p-8">
+      <div className="flex min-h-[calc(100vh-73px)] items-center justify-center p-8">
 
-        <div className="w-full max-w-lg rounded border-2 border-white p-2">
+        <div className="w-full max-w-xl rounded-2xl border bg-gradient-to-b from-white/90 to-white/20 p-10 text-center shadow-lg">
 
-          <h2 className="mb-4 text-2xl font-bold">
+          <h2 className="mb-4 text-xl font-bold font-sans">
             Welcome, {user?.name || "User"}!
           </h2>
+
+          <div className="mt-8">
+            <h3 className="text-3xl font-bold">
+              {currentTime.toLocaleTimeString()}
+            </h3>
+            <p className="mt-4 text-xl">
+              {String(currentTime.getDate()).padStart(2 ,"0")}/
+              {String(currentTime.getMonth() + 1).padStart(2 , "0")}/
+              {currentTime.getFullYear()}
+            </p>
+          </div>
 
           {showProfile && (
             <div className="space-y-4">
@@ -310,7 +284,5 @@ export default function DashboardClient() {
       </div>
 
     </main>
-
   );
 }
- 

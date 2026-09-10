@@ -21,4 +21,6 @@ const User =
   mongoose.model("User", userSchema);
 
 export default User;
+
 //Users be like User -- name -- email -- password
+

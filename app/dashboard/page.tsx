@@ -1,7 +1,9 @@
 import DashboardClient from "./DashboardClient";
-
-export const dynamic = "force-dynamic";
-
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 export default function DashboardPage() {
-  return <DashboardClient />;
+  return(
+    <ProtectedRoute> 
+       <DashboardClient/>
+     </ProtectedRoute>
+  );
 }

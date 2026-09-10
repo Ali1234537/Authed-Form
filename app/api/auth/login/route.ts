@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
+
 import bcrypt from "bcryptjs";
 
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
-import { createSession } from "@/lib/auth";
+
+import {
+  createToken,
+  setToken,
+} from "@/lib/auth";
 
 export async function POST(
   request: Request
@@ -11,12 +16,17 @@ export async function POST(
   try {
     const data = await request.json();
 
-    const email = data.email?.toLowerCase();
+    const email =
+      data.email?.toLowerCase();
+
     const password = data.password;
 
     if (!email || !password) {
       return NextResponse.json(
-        { message: "Email and password are required." },
+        {
+          message:
+            "Email and password are required.",
+        },
         { status: 400 }
       );
     }
@@ -29,7 +39,10 @@ export async function POST(
 
     if (!user) {
       return NextResponse.json(
-        { message: "Invalid email or password." },
+        {
+          message:
+            "Invalid email or password.",
+        },
         { status: 401 }
       );
     }
@@ -42,28 +55,37 @@ export async function POST(
 
     if (!correctPassword) {
       return NextResponse.json(
-        { message: "Invalid email or password." },
+        {
+          message:
+            "Invalid email or password.",
+        },
         { status: 401 }
       );
     }
 
-    await createSession(
+    const token = createToken(
       user._id.toString()
     );
+
+    await setToken(token);
 
     return NextResponse.json({
       user: {
         id: user._id.toString(),
         name: user.name,
         email: user.email,
-        image: user.image,
       },
     });
+
   } catch (error) {
+
     console.log(error);
 
     return NextResponse.json(
-      { message: "Something went wrong." },
+      {
+        message:
+          "Something went wrong.",
+      },
       { status: 500 }
     );
   }

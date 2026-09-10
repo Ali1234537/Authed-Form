@@ -1,94 +1,77 @@
-import crypto from "crypto";
+import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 
 import { connectDB } from "./mongodb";
 import User from "@/models/User";
-import Session from "@/models/Session";
 
-export async function createSession(
-  userId: string
-) {
-  await connectDB();
+const JWT_SECRET = process.env.JWT_SECRET;
 
-  const sessionId = crypto.randomUUID();
+export function createToken(userId: string) {
+  if (!JWT_SECRET) {
+    throw new Error("JWT_SECRET is missing");
+  }
 
-  const expiresAt = new Date();
-
-  expiresAt.setDate(
-    expiresAt.getDate() + 7
+  return jwt.sign(
+    { userId },
+    JWT_SECRET,
+    {
+      expiresIn: "7d",
+    }
   );
+}
 
-  await Session.create({
-    sessionId,
-    userId,
-    expiresAt,
-  });
-
+export async function setToken(token: string) {
   const cookieStore = await cookies();
 
-  cookieStore.set("sessionId", sessionId, {
+  cookieStore.set("token", token, {
     httpOnly: true,
-    secure:
-      process.env.NODE_ENV === "production",
+    secure: false,
     sameSite: "lax",
-    expires: expiresAt,
+    maxAge: 60 * 60 * 24 * 7,
     path: "/",
   });
 }
 
 export async function getCurrentUser() {
-  await connectDB();
+  try {
+    const cookieStore = await cookies();
 
-  const cookieStore = await cookies();
+    const token =
+      cookieStore.get("token")?.value;
 
-  const sessionId =
-    cookieStore.get("sessionId")?.value;
+    if (!token || !JWT_SECRET) {
+      return null;
+    }
 
-  if (!sessionId) {
+    const decoded = jwt.verify(
+      token,
+      JWT_SECRET
+    ) as {
+      userId: string;
+    };
+
+    await connectDB();
+
+    const user = await User.findById(
+      decoded.userId
+    );
+
+    if (!user) {
+      return null;
+    }
+
+    return {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+    };
+  } catch {
     return null;
   }
-
-  const session = await Session.findOne({
-    sessionId,
-  });
-
-  if (!session) {
-    return null;
-  }
-
-  if (session.expiresAt < new Date()) {
-    return null;
-  }
-
-  const user = await User.findById(
-    session.userId
-  );
-
-  if (!user) {
-    return null;
-  }
-
-  return {
-    id: user._id.toString(),
-    name: user.name,
-    email: user.email,
-    image: user.image,
-  };
 }
 
 export async function logoutUser() {
-  await connectDB();
-
   const cookieStore = await cookies();
 
-  const sessionId =
-    cookieStore.get("sessionId")?.value;
-
-  if (sessionId) {
-    await Session.deleteOne({
-      sessionId,
-    });
-  }
-
-  cookieStore.delete("sessionId");
+  cookieStore.delete("token");
 }

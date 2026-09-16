@@ -32,74 +32,76 @@ export default function LoginPage() {
   const [loading, setLoading] =useState(false);
 
   async function handleLogin(
-    event: React.FormEvent
-  ) {
+  event: React.FormEvent
+) {
+  event.preventDefault();
 
-    event.preventDefault();
+  setError("");
+  setLoading(true);
 
-    setError("");
-    setLoading(true);
+  dispatch(loginStart());
 
-    dispatch(loginStart());
+  try {
+    const response = await fetch(
+      "/api/auth/login",
+      {
+        method: "POST",
 
-    try {
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-      const response = await fetch(
-        "/api/auth/login",
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-
-          body: JSON.stringify({
-            email,
-            password,
-          }),
-        }
-      );
-
-      const data =
-        await response.json();
-
-      if (!response.ok) {
-
-        setError(data.message);
-
-        dispatch(
-          loginFailed(data.message)
-        );
-
-        setLoading(false);
-
-        return;
+        body: JSON.stringify({
+          email,
+          password,
+        }),
       }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setError(data.message);
 
       dispatch(
-        loginSuccess(data.user)
-      );
-      
-      setLoading(false)
-
-      router.push("/dashboard");
-
-    } catch {
-
-      setError(
-        "Something went wrong."
-      );
-
-      dispatch(
-        loginFailed(
-          "Something went wrong."
-        )
+        loginFailed(data.message)
       );
 
       setLoading(false);
+
+      setTimeout(() => {
+        setError("");
+      }, 2000);
+
+      return;
     }
+
+    dispatch(
+      loginSuccess(data.user)
+    );
+
+    setLoading(false);
+    router.push("/dashboard");
+     
+
+  } catch {
+    setError(
+      "Something went wrong."
+    );
+
+    dispatch(
+      loginFailed(
+        "Something went wrong."
+      )
+    );
+
+    setLoading(false);
+
+    setTimeout(() => {
+      setError("");
+    }, 7000);
   }
+}
 
   return (
     <PublicRoute>
@@ -117,16 +119,26 @@ export default function LoginPage() {
           </h1>
 
           <input
+            
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) =>
               setEmail(e.target.value)
             }
+            onKeyDown={(e)=>{
+              if(e.key === "ArrowDown"){
+                e.preventDefault();
+                document.getElementById("password")?.focus();
+              }
+            }}
+            autoFocus
             className="w-full rounded border p-2"
           />
 
           <input
+             
+            id = "password" 
             type="password"
             placeholder="Password"
             value={password}
@@ -136,11 +148,13 @@ export default function LoginPage() {
             className="w-full rounded border p-2"
           />
 
-          {error && (
-            <p className="text-red-500">
-              {error}
-            </p>
-          )}
+          <div className="h-10"> 
+             {error && (
+               <p className="text-red-500 font-bold rounded-lg bg-red-100 p-3 font-sans">
+               {error}
+             </p>
+             )}
+          </div>
 
           <button
             type="submit"
@@ -157,6 +171,13 @@ export default function LoginPage() {
               "Login"
             )}
 
+          </button>
+
+          <button type="button"
+           onClick={() => router.push("/forgot-password")}
+           className="w-full text-sm underline cursor-pointer"
+          >
+           Forgot Password?
           </button>
           
 

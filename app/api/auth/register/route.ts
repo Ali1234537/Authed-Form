@@ -13,6 +13,7 @@ export async function POST(
     const name = data.name;
     const email = data.email?.toLowerCase();
     const password = data.password;
+     
 
     if (!name || !email || !password) {
       return NextResponse.json(

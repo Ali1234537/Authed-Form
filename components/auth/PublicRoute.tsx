@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
-import { useAppSelector } from "@/redux/hooks";
-
+ 
 interface PublicRouteProps {
   children: React.ReactNode;
 }
@@ -14,16 +12,39 @@ export default function PublicRoute({
 }: PublicRouteProps) {
   const router = useRouter();
 
-  const isAuthenticated =
-    useAppSelector(
-      (state) => state.auth.isAuthenticated
-    );
+   
 
+  const [checking, setChecking]=useState(true);
+
+  // This is the useEffect that check whether the user has valid 
+  // token by calling this "/api/auth/indiv"
+  // and if the response (token exists) is OK then router.replace("/dashboard") 
+  
   useEffect(() => {
-    if (isAuthenticated) {
-      router.replace("/dashboard");
+    async function checkUser() {
+      try {
+        const response = await fetch(
+          "/api/auth/indiv"
+        );
+
+        if (response.ok) {
+          router.replace("/dashboard");
+          return;
+        }
+
+        setChecking(false);
+      } catch {
+        setChecking(false);
+      }
     }
-  }, [isAuthenticated, router]);
+
+
+    checkUser();
+  }, [router]);
+
+  if (checking) {
+    return null;
+  }
 
   return <>{children}</>;
 }

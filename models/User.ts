@@ -10,6 +10,9 @@ const userSchema = new mongoose.Schema(
     },
 
     password: String,
+     resetPasswordToken: String,
+
+    resetPasswordExpires: Date,
   },
   {
     timestamps: true,
@@ -22,5 +25,6 @@ const User =
 
 export default User;
 
-//Users be like User -- name -- email -- password
 
+//Users be like   User ---> ( name && email && password)
+          

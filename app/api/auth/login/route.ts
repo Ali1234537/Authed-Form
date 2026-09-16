@@ -41,7 +41,7 @@ export async function POST(
       return NextResponse.json(
         {
           message:
-            "Invalid email or password.",
+            "No user exists with this email",
         },
         { status: 401 }
       );

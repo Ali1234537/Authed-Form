@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader } from "lucide-react";
 import PublicRoute from "@/components/auth/PublicRoute";
 
-export default function ResetPasswordPage() {
+function ResetPasswordPage() {
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -83,87 +83,95 @@ export default function ResetPasswordPage() {
 
   return (
     <PublicRoute>
-    <main
-      className="flex min-h-screen items-center justify-center bg-cover bg-center"
-      style={{
-        backgroundImage:
-          "url('/poster1.jpg')",
-      }}
-    >
-      <form
-        onSubmit={handleSubmit}
-        className="w-96 space-y-4 rounded border p-8"
+      <main
+        className="flex min-h-screen items-center justify-center bg-cover bg-center"
+        style={{
+          backgroundImage:
+            "url('/poster1.jpg')",
+        }}
       >
-        <h1 className="text-2xl font-bold">
-          Reset Password
-        </h1>
-
-        <p className="text-sm">
-          Enter your new password below.
-        </p>
-
-        <input
-          type="password"
-          placeholder="New Password"
-          value={password}
-          onChange={(e) =>
-            setPassword(e.target.value)
-          }
-          required
-          className="w-full rounded border p-2"
-        />
-
-        <input
-          type="password"
-          placeholder="Confirm New Password"
-          value={confirmPassword}
-          onChange={(e) =>
-            setConfirmPassword(e.target.value)
-          }
-          required
-          className="w-full rounded border p-2"
-        />
-
-        <div className="min-h-10">
-          {error && (
-            <p className="rounded-lg bg-red-100 p-3 font-bold text-red-500">
-              {error}
-            </p>
-          )}
-
-          {message && (
-            <p className="rounded-lg bg-green-100 p-3 font-bold text-green-700">
-              {message}
-            </p>
-          )}
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="flex w-full items-center justify-center gap-2 rounded bg-black p-2 text-white cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
+        <form
+          onSubmit={handleSubmit}
+          className="w-96 space-y-4 rounded border p-8"
         >
-          {loading ? (
-            <>
-              <Loader className="h-5 w-5 animate-spin" />
-              Resetting...
-            </>
-          ) : (
-            "Reset Password"
-          )}
-        </button>
+          <h1 className="text-2xl font-bold">
+            Reset Password
+          </h1>
 
-        <button
-          type="button"
-          onClick={() =>
-            router.push("/login")
-          }
-          className="w-full text-sm underline cursor-pointer"
-        >
-          Back to Login
-        </button>
-      </form>
-    </main>
+          <p className="text-sm">
+            Enter your new password below.
+          </p>
+
+          <input
+            type="password"
+            placeholder="New Password"
+            value={password}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
+            required
+            className="w-full rounded border p-2"
+          />
+
+          <input
+            type="password"
+            placeholder="Confirm New Password"
+            value={confirmPassword}
+            onChange={(e) =>
+              setConfirmPassword(e.target.value)
+            }
+            required
+            className="w-full rounded border p-2"
+          />
+
+          <div className="min-h-10">
+            {error && (
+              <p className="rounded-lg bg-red-100 p-3 font-bold text-red-500">
+                {error}
+              </p>
+            )}
+
+            {message && (
+              <p className="rounded-lg bg-green-100 p-3 font-bold text-green-700">
+                {message}
+              </p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded bg-black p-2 text-white disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {loading ? (
+              <>
+                <Loader className="h-5 w-5 animate-spin" />
+                Resetting...
+              </>
+            ) : (
+              "Reset Password"
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              router.push("/login")
+            }
+            className="w-full cursor-pointer text-sm underline"
+          >
+            Back to Login
+          </button>
+        </form>
+      </main>
     </PublicRoute>
+  );
+}
+
+export default function ResetPasswordPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <ResetPasswordPage />
+    </Suspense>
   );
 }
